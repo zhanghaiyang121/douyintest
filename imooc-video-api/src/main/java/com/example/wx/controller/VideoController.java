@@ -55,7 +55,7 @@ public class VideoController {
                     fileNamePrefix += arrayFilenameItem[i];
                 }
 
-                finalVideoPath = "D:/myworkspace/dyapp" + uploadPathDB + "/" + fileName;
+                finalVideoPath = "D:/douyintest" + uploadPathDB + "/" + fileName;
                 File outFile = new File(finalVideoPath);
                 if (outFile.getParentFile() != null || !outFile.getParentFile().isDirectory()) {
                     // 创建父文件夹
