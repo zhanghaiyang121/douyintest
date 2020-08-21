@@ -44,12 +44,14 @@ public class VideoController {
         FileOutputStream fileOutputStream = null;
         InputStream inputStream = null;
         String uploadPathDB = null;
+        String finalVideoPath = "";
+        String fileName="";
         try {
             if (file!=null){
-                String fileName = file.getOriginalFilename();
+                fileName = file.getOriginalFilename();
                 System.out.println(fileName);
                 // 文件上传的最终保存路径
-                String finalVideoPath = "";
+
                 String userId =userid;
                 uploadPathDB = "/" + userId + "/video";
                 String arrayFilenameItem[] =  fileName.split("\\.");
@@ -93,7 +95,7 @@ public class VideoController {
         video.setVideoHeight(videoHeight);
         video.setVideoWidth(videoWidth);
         video.setVideoDesc(videoDesc);
-        video.setVideoPath(uploadPathDB);
+        video.setVideoPath(uploadPathDB + "/" + fileName);
         video.setCoverPath("");
         video.setStatus(0);
         video.setLikeCounts((long) 0);
