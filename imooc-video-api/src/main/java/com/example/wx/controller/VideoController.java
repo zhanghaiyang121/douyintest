@@ -6,6 +6,7 @@ import com.example.db.service.VideoService;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -34,20 +35,23 @@ public class VideoController {
     }
 
     //测试文件请求，把文件内容写入到本地文件内
-    @RequestMapping(value="/testvideo",headers="content-type=multipart/form-data")
+    @PostMapping(value="/testvideo",headers="content-type=multipart/form-data")
     @ResponseBody
-    public void testvideo(@RequestBody MultipartFile file) throws IOException {
+    public com.imooc.utils.IMoocJSONResult testvideo(String userid,
+                                                     String audioId, double videoSeconds,
+                                                     int videoWidth, int videoHeight,
+                                                     String videoDesc, MultipartFile file) throws IOException {
         FileOutputStream fileOutputStream = null;
         InputStream inputStream = null;
-
+        String uploadPathDB = null;
         try {
             if (file!=null){
                 String fileName = file.getOriginalFilename();
                 System.out.println(fileName);
                 // 文件上传的最终保存路径
                 String finalVideoPath = "";
-                String userId ="2008198M5TMPMNR4";
-                String uploadPathDB = "/" + userId + "/video";
+                String userId =userid;
+                uploadPathDB = "/" + userId + "/video";
                 String arrayFilenameItem[] =  fileName.split("\\.");
                 String fileNamePrefix = "";
 
@@ -75,9 +79,31 @@ public class VideoController {
             }
         }
 
+        // 保存视频信息到数据库
+        System.out.println(userid);
+        System.out.println(audioId);
+        System.out.println(videoSeconds);
+        System.out.println(videoWidth);
+        System.out.println(videoHeight);
+        System.out.println(videoDesc);
+        Video video = new Video();
+        video.setAudioId(audioId);
+        video.setUserId(userid);
+        video.setVideoSeconds((float)videoSeconds);
+        video.setVideoHeight(videoHeight);
+        video.setVideoWidth(videoWidth);
+        video.setVideoDesc(videoDesc);
+        video.setVideoPath(uploadPathDB);
+        video.setCoverPath("");
+        video.setStatus(0);
+        video.setLikeCounts((long) 0);
+        Date nowdate=new Date();
+        SimpleDateFormat simpleDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        video.setCreateTime(Timestamp.valueOf(simpleDate.format(nowdate)));
 
 
 
-
+        String id=videoService.saveVideo(video);
+        return com.imooc.utils.IMoocJSONResult.ok(video);
     }
 }
