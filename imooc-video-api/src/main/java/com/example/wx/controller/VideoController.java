@@ -3,6 +3,8 @@ package com.example.wx.controller;
 import com.example.db.pojo.Users;
 import com.example.db.pojo.Video;
 import com.example.db.service.VideoService;
+import com.example.db.vo.VideoVo;
+import com.example.wx.utils.FetchVideoCover;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,9 +22,17 @@ import java.util.List;
 
 @Controller
 public class VideoController {
+    public static final String FFMPEG_EXE = "C:\\ffmpeg\\bin\\ffmpeg.exe";
     @Autowired
     VideoService videoService;
 
+    //保存上传视频信息
+    @RequestMapping("/videolist")
+    @ResponseBody
+    public com.imooc.utils.IMoocJSONResult getvideolist(@RequestBody VideoVo video){
+        List<VideoVo> list=videoService.getVedioList(video);
+        return com.imooc.utils.IMoocJSONResult.ok(list);
+    }
     //保存上传视频信息
     @RequestMapping("/upload")
     @ResponseBody
@@ -40,27 +50,30 @@ public class VideoController {
     public com.imooc.utils.IMoocJSONResult testvideo(String userid,
                                                      String audioId, double videoSeconds,
                                                      int videoWidth, int videoHeight,
-                                                     String videoDesc, MultipartFile file) throws IOException {
+                                                     String videoDesc, MultipartFile file) throws IOException, InterruptedException {
         FileOutputStream fileOutputStream = null;
         InputStream inputStream = null;
         String uploadPathDB = null;
         String finalVideoPath = "";
         String fileName="";
+        String coverPathDB="";
+        String fileNamePrefix = "";
+        String userId =userid;
         try {
             if (file!=null){
                 fileName = file.getOriginalFilename();
                 System.out.println(fileName);
                 // 文件上传的最终保存路径
 
-                String userId =userid;
+
                 uploadPathDB = "/" + userId + "/video";
                 String arrayFilenameItem[] =  fileName.split("\\.");
-                String fileNamePrefix = "";
+
 
                 for (int i = 0 ; i < arrayFilenameItem.length-1 ; i ++) {
                     fileNamePrefix += arrayFilenameItem[i];
                 }
-
+                coverPathDB = "D:/douyintest" + "/"+userId + "/video/" + fileNamePrefix + ".jpg";
                 finalVideoPath = "D:/douyintest" + uploadPathDB + "/" + fileName;
                 File outFile = new File(finalVideoPath);
                 if (outFile.getParentFile() != null || !outFile.getParentFile().isDirectory()) {
@@ -81,6 +94,10 @@ public class VideoController {
             }
         }
 
+
+        FetchVideoCover videoInfo = new FetchVideoCover(FFMPEG_EXE);
+        System.out.println(coverPathDB);
+        videoInfo.getCover(finalVideoPath, coverPathDB);
         // 保存视频信息到数据库
         System.out.println(userid);
         System.out.println(audioId);
@@ -96,7 +113,7 @@ public class VideoController {
         video.setVideoWidth(videoWidth);
         video.setVideoDesc(videoDesc);
         video.setVideoPath(uploadPathDB + "/" + fileName);
-        video.setCoverPath("");
+        video.setCoverPath("/"+userId + "/video/" + fileNamePrefix + ".jpg");
         video.setStatus(0);
         video.setLikeCounts((long) 0);
         Date nowdate=new Date();

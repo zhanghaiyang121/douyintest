@@ -1,10 +1,13 @@
 package com.example.db.service;
 
+import com.example.db.vo.VideoVo;
 import org.n3r.idworker.Sid;
 import com.example.db.mapper.VideoMapper;
 import com.example.db.pojo.Video;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class VideoService {
@@ -30,5 +33,9 @@ public class VideoService {
         System.out.println(video.getId());
         videoMapper.saveVideo(video);
         return videoId;
+    }
+
+    public List<VideoVo> getVedioList(VideoVo video){
+        return videoMapper.getVedioList(video);
     }
 }
